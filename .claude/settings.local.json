@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(yes:*)",
+      "Bash(npx:*)",
+      "Bash(mv:*)",
+      "Bash(npm install:*)",
+      "Bash(curl:*)"
+    ]
+  },
+  "enabledPlugins": {
+    "superpowers@superpowers-marketplace": true
+  }
+}
