@@ -125,7 +125,9 @@ export default function Player() {
     const origin = camera.position.clone();
     const baseDir = new Vector3(0, 0, -1);
     baseDir.applyEuler(new Euler(pitch.current, yaw.current, 0, 'YXZ'));
-    let anyHit = false;
+
+    // Accumulate damage per bot across all pellets, then apply once
+    const damageMap = new Map();
 
     for (let p = 0; p < pelletCount; p++) {
       const direction = baseDir.clone();
@@ -149,14 +151,7 @@ export default function Player() {
           const dz = hp.z - bot.position[2];
           const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
           if (dist < 1.5) {
-            const botBefore = store.bots.find(b => b.id === bot.id);
-            store.damageBot(bot.id, weaponData.damage);
-            if (botBefore.health - weaponData.damage <= 0) {
-              if (!anyHit) playKill();
-            } else {
-              if (!anyHit) playHit();
-            }
-            anyHit = true;
+            damageMap.set(bot.id, (damageMap.get(bot.id) || 0) + weaponData.damage);
             break;
           }
         }
@@ -171,6 +166,22 @@ export default function Player() {
           [direction.x, direction.y, direction.z],
           Math.max(hitDist - 1.5, 0.5)
         );
+      }
+    }
+
+    // Apply accumulated damage once per bot
+    let playedSound = false;
+    for (const [botId, totalDamage] of damageMap) {
+      const botBefore = useGameStore.getState().bots.find(b => b.id === botId);
+      if (!botBefore || !botBefore.alive) continue;
+      store.damageBot(botId, totalDamage);
+      if (!playedSound) {
+        if (botBefore.health - totalDamage <= 0) {
+          playKill();
+        } else {
+          playHit();
+        }
+        playedSound = true;
       }
     }
   }, [camera, rapier, world]);

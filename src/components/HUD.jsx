@@ -69,6 +69,22 @@ function KillFeed() {
   );
 }
 
+function WeaponSlots() {
+  const currentWeapon = useGameStore(s => s.player.weapon);
+  return (
+    <div style={styles.weaponSlots}>
+      {WEAPON_SLOTS.map(key => (
+        <div key={key} style={{
+          ...styles.weaponSlot,
+          ...(currentWeapon === key ? styles.activeSlot : {}),
+        }}>
+          {WEAPONS[key].slot}. {WEAPONS[key].name}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function HUD() {
   const player = useGameStore(s => s.player);
   const timeRemaining = useGameStore(s => s.timeRemaining);
@@ -189,17 +205,7 @@ export default function HUD() {
         </div>
       </div>
 
-      {/* Weapon slots — auto-generated from WEAPON_SLOTS */}
-      <div style={styles.weaponSlots}>
-        {WEAPON_SLOTS.map(key => (
-          <div key={key} style={{
-            ...styles.weaponSlot,
-            ...(player.weapon === key ? styles.activeSlot : {}),
-          }}>
-            {WEAPONS[key].slot}. {WEAPONS[key].name}
-          </div>
-        ))}
-      </div>
+      <WeaponSlots />
 
       {!player.alive && (
         <div style={styles.deathOverlay}>
@@ -257,7 +263,7 @@ const styles = {
   ammo: { fontSize: '24px', fontWeight: 'bold' },
   weaponSlots: { position: 'fixed', bottom: '90px', right: '30px', display: 'flex', gap: '5px', zIndex: 100 },
   weaponSlot: { padding: '5px 10px', fontSize: '12px', fontFamily: 'monospace', backgroundColor: 'rgba(0,0,0,0.5)', color: '#888', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '3px' },
-  activeSlot: { color: '#fff', borderColor: '#ff6644', backgroundColor: 'rgba(255,100,50,0.2)' },
+  activeSlot: { color: '#fff', border: '1px solid #ff6644', backgroundColor: 'rgba(255,100,50,0.2)' },
   deathOverlay: { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(100,0,0,0.3)', zIndex: 200, pointerEvents: 'none' },
   scoreboardOverlay: { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 300 },
   scoreboard: { padding: '20px', fontFamily: 'monospace' },

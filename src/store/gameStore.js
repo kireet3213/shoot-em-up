@@ -97,9 +97,10 @@ const useGameStore = create((set, get) => ({
 
     const level = state.currentLevel;
 
-    // Handle player respawn
-    let player = { ...state.player };
+    // Handle player respawn (only create new object if dead)
+    let player = state.player;
     if (!player.alive) {
+      player = { ...player };
       player.respawnTimer -= delta;
       if (player.respawnTimer <= 0) {
         player.alive = true;
@@ -111,23 +112,26 @@ const useGameStore = create((set, get) => ({
       }
     }
 
-    // Handle bot respawns
-    const bots = state.bots.map(bot => {
-      if (!bot.alive) {
-        const newTimer = bot.respawnTimer - delta;
-        if (newTimer <= 0) {
-          return {
-            ...bot,
-            alive: true,
-            health: MATCH_CONFIG.botHealth,
-            respawnTimer: 0,
-            position: randomSpawn(level),
-          };
-        }
-        return { ...bot, respawnTimer: newTimer };
-      }
-      return bot;
-    });
+    // Handle bot respawns (only create new array if any bot is dead)
+    const hasDeadBot = state.bots.some(b => !b.alive);
+    const bots = hasDeadBot
+      ? state.bots.map(bot => {
+          if (!bot.alive) {
+            const newTimer = bot.respawnTimer - delta;
+            if (newTimer <= 0) {
+              return {
+                ...bot,
+                alive: true,
+                health: MATCH_CONFIG.botHealth,
+                respawnTimer: 0,
+                position: randomSpawn(level),
+              };
+            }
+            return { ...bot, respawnTimer: newTimer };
+          }
+          return bot;
+        })
+      : state.bots;
 
     set({ timeRemaining: newTime, player, bots });
   },
@@ -142,7 +146,8 @@ const useGameStore = create((set, get) => ({
   damageBot: (botId, damage, killerName) => {
     const state = get();
     const killedBot = state.bots.find(b => b.id === botId);
-    const willDie = killedBot && killedBot.health - damage <= 0;
+    if (!killedBot || !killedBot.alive) return;
+    const willDie = killedBot.health - damage <= 0;
 
     set(state => {
       const bots = state.bots.map(bot => {
