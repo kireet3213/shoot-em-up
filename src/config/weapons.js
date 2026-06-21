@@ -32,6 +32,19 @@ const WEAPONS = {
     type: 'hitscan',
     sound: 'smg',
   },
+  shotgun: {
+    name: 'Shotgun',
+    damage: 12,
+    fireRate: 800,
+    ammo: 6,
+    maxAmmo: 6,
+    range: 20,
+    spread: 0.1,
+    slot: 3,
+    type: 'hitscan',
+    pellets: 8,
+    sound: 'shotgun',
+  },
   knife: {
     name: 'Knife',
     damage: 50,
@@ -40,25 +53,10 @@ const WEAPONS = {
     maxAmmo: Infinity,
     range: 3,
     spread: 0,
-    slot: 3,
+    slot: 4,
     type: 'melee',
     sound: 'knife',
   },
-
-  // ---- EXAMPLE: adding a new weapon ----
-  // shotgun: {
-  //   name: 'Shotgun',
-  //   damage: 12,        // per pellet
-  //   fireRate: 800,
-  //   ammo: 6,
-  //   maxAmmo: 6,
-  //   range: 20,
-  //   spread: 0.1,
-  //   slot: 4,
-  //   type: 'hitscan',
-  //   pellets: 8,        // custom field: number of pellets
-  //   sound: 'shotgun',
-  // },
 };
 
 // Ordered list of weapon keys for HUD display and cycling

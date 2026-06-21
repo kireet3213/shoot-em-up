@@ -120,40 +120,57 @@ export default function Player() {
     // Muzzle flash
     store.triggerMuzzleFlash();
 
-    // Raycast from camera
-    const direction = new Vector3(0, 0, -1);
-    direction.applyEuler(new Euler(pitch.current, yaw.current, 0, 'YXZ'));
-    direction.x += (Math.random() - 0.5) * weaponData.spread;
-    direction.y += (Math.random() - 0.5) * weaponData.spread;
-    direction.normalize();
-
+    // Fire one or more pellets (shotgun fires multiple)
+    const pelletCount = weaponData.pellets || 1;
     const origin = camera.position.clone();
+    const baseDir = new Vector3(0, 0, -1);
+    baseDir.applyEuler(new Euler(pitch.current, yaw.current, 0, 'YXZ'));
+    let anyHit = false;
 
-    const ray = new rapier.Ray(
-      { x: origin.x, y: origin.y, z: origin.z },
-      { x: direction.x, y: direction.y, z: direction.z }
-    );
-    const hit = world.castRay(ray, weaponData.range, true);
+    for (let p = 0; p < pelletCount; p++) {
+      const direction = baseDir.clone();
+      direction.x += (Math.random() - 0.5) * weaponData.spread;
+      direction.y += (Math.random() - 0.5) * weaponData.spread;
+      direction.normalize();
 
-    if (hit) {
-      const hp = ray.pointAt(hit.timeOfImpact);
+      const ray = new rapier.Ray(
+        { x: origin.x, y: origin.y, z: origin.z },
+        { x: direction.x, y: direction.y, z: direction.z }
+      );
+      const hit = world.castRay(ray, weaponData.range, true, undefined, undefined, undefined, bodyRef.current);
 
-      const aliveBots = store.bots.filter(b => b.alive);
-      for (const bot of aliveBots) {
-        const dx = hp.x - bot.position[0];
-        const dy = hp.y - bot.position[1];
-        const dz = hp.z - bot.position[2];
-        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (dist < 1.5) {
-          const botBefore = store.bots.find(b => b.id === bot.id);
-          store.damageBot(bot.id, weaponData.damage);
-          if (botBefore.health - weaponData.damage <= 0) {
-            playKill();
-          } else {
-            playHit();
+      if (hit) {
+        const hp = ray.pointAt(hit.timeOfImpact);
+
+        const aliveBots = store.bots.filter(b => b.alive);
+        for (const bot of aliveBots) {
+          const dx = hp.x - bot.position[0];
+          const dy = hp.y - bot.position[1];
+          const dz = hp.z - bot.position[2];
+          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          if (dist < 1.5) {
+            const botBefore = store.bots.find(b => b.id === bot.id);
+            store.damageBot(bot.id, weaponData.damage);
+            if (botBefore.health - weaponData.damage <= 0) {
+              if (!anyHit) playKill();
+            } else {
+              if (!anyHit) playHit();
+            }
+            anyHit = true;
+            break;
           }
-          break;
         }
+      }
+
+      // Spawn visual projectile (skip for melee)
+      if (weaponData.type !== 'melee') {
+        const projStart = origin.clone().add(direction.clone().multiplyScalar(1.5));
+        const hitDist = hit ? hit.timeOfImpact : weaponData.range;
+        store.addProjectile(
+          [projStart.x, projStart.y, projStart.z],
+          [direction.x, direction.y, direction.z],
+          Math.max(hitDist - 1.5, 0.5)
+        );
       }
     }
   }, [camera, rapier, world]);

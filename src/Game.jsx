@@ -1,10 +1,12 @@
 import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
+import { Sky } from '@react-three/drei';
 import Arena from './components/Arena';
 import Player from './components/Player';
 import Bot from './components/Bot';
 import Weapon from './components/Weapon';
+import Projectiles from './components/Projectiles';
 import HUD from './components/HUD';
 import useGameStore from './store/gameStore';
 import { LEVELS } from './config/levels';
@@ -24,14 +26,24 @@ function Scene() {
   if (gameState === 'menu') return null;
 
   return (
-    <Physics gravity={[0, -15, 0]}>
-      <Arena />
-      <Player />
-      {bots.map(bot => (
-        <Bot key={bot.id} bot={bot} />
-      ))}
-      <Weapon />
-    </Physics>
+    <>
+      <Sky
+        sunPosition={[100, 10, 100]}
+        turbidity={10}
+        rayleigh={2}
+        mieCoefficient={0.005}
+        mieDirectionalG={0.8}
+      />
+      <Physics gravity={[0, -15, 0]}>
+        <Arena />
+        <Player />
+        {bots.map(bot => (
+          <Bot key={bot.id} bot={bot} />
+        ))}
+        <Weapon />
+        <Projectiles />
+      </Physics>
+    </>
   );
 }
 

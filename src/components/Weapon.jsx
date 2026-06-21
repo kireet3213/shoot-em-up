@@ -88,12 +88,50 @@ function SMGModel() {
   );
 }
 
+function ShotgunModel() {
+  return (
+    <group position={[0.2, -0.28, -0.5]}>
+      {/* Barrel */}
+      <mesh position={[0, 0, -0.2]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.025, 0.025, 0.45, 8]} />
+        <meshStandardMaterial color="#1a1a1a" metalness={0.9} roughness={0.2} />
+      </mesh>
+      {/* Second barrel */}
+      <mesh position={[0.03, 0, -0.2]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.025, 0.025, 0.45, 8]} />
+        <meshStandardMaterial color="#1a1a1a" metalness={0.9} roughness={0.2} />
+      </mesh>
+      {/* Receiver */}
+      <mesh position={[0.015, -0.01, 0.05]}>
+        <boxGeometry args={[0.08, 0.07, 0.2]} />
+        <meshStandardMaterial color="#2a2a2a" metalness={0.7} roughness={0.4} />
+      </mesh>
+      {/* Stock */}
+      <mesh position={[0.015, -0.02, 0.25]} rotation={[0.05, 0, 0]}>
+        <boxGeometry args={[0.05, 0.06, 0.25]} />
+        <meshStandardMaterial color="#4a3020" />
+      </mesh>
+      {/* Pump grip */}
+      <mesh position={[0.015, -0.06, -0.08]}>
+        <boxGeometry args={[0.05, 0.04, 0.1]} />
+        <meshStandardMaterial color="#3a2a1a" />
+      </mesh>
+      {/* Trigger guard */}
+      <mesh position={[0.015, -0.08, 0.08]} rotation={[0.3, 0, 0]}>
+        <boxGeometry args={[0.04, 0.08, 0.04]} />
+        <meshStandardMaterial color="#2a2a2a" />
+      </mesh>
+      <MuzzleFlash position={[0.015, 0, -0.46]} />
+    </group>
+  );
+}
+
 // Registry: weapon key -> model component
 const WEAPON_MODELS = {
   knife: KnifeModel,
   pistol: PistolModel,
   smg: SMGModel,
-  // shotgun: ShotgunModel,  // add new weapon models here
+  shotgun: ShotgunModel,
 };
 
 export default function Weapon() {

@@ -50,6 +50,8 @@ const useGameStore = create((set, get) => ({
   damageIndicators: [],
   nextDamageId: 0,
   killFeed: [],
+  projectiles: [],
+  nextProjectileId: 0,
 
   // ---- Actions ----
 
@@ -259,6 +261,21 @@ const useGameStore = create((set, get) => ({
         damageIndicators: state.damageIndicators.filter(d => Date.now() - d.time < 1000),
       }));
     }, 1100);
+  },
+
+  addProjectile: (origin, direction, maxDistance) => {
+    const id = get().nextProjectileId;
+    set(state => ({
+      projectiles: [...state.projectiles, { id, origin, direction, maxDistance, createdAt: Date.now() }],
+      nextProjectileId: id + 1,
+    }));
+    setTimeout(() => {
+      set(state => ({ projectiles: state.projectiles.filter(p => p.id !== id) }));
+    }, 2000);
+  },
+
+  removeProjectile: (id) => {
+    set(state => ({ projectiles: state.projectiles.filter(p => p.id !== id) }));
   },
 
   addKillFeedEntry: (killer, victim) => {

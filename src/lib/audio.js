@@ -105,13 +105,42 @@ function playKnifeSwing() {
   src.start(c.currentTime);
 }
 
+function playShotgunBlast() {
+  const c = getCtx();
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  const filter = c.createBiquadFilter();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(100, c.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(30, c.currentTime + 0.2);
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(2000, c.currentTime);
+  filter.frequency.exponentialRampToValueAtTime(100, c.currentTime + 0.25);
+  gain.gain.setValueAtTime(0.5, c.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.25);
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(c.destination);
+  osc.start(c.currentTime);
+  osc.stop(c.currentTime + 0.25);
+
+  const src = c.createBufferSource();
+  src.buffer = noise(0.15, 0.7);
+  const g2 = c.createGain();
+  g2.gain.setValueAtTime(0.6, c.currentTime);
+  g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.15);
+  src.connect(g2);
+  g2.connect(c.destination);
+  src.start(c.currentTime);
+}
+
 // ---- Weapon sound registry ----
 // Map weapon sound key -> fire function
 const WEAPON_SOUNDS = {
   pistol: playPistolShot,
   smg: playSMGShot,
+  shotgun: playShotgunBlast,
   knife: playKnifeSwing,
-  // shotgun: playShotgunBlast,  // add new weapons here
 };
 
 export function playWeaponSound(soundKey) {
